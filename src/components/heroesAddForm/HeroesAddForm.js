@@ -7,28 +7,62 @@
 // Дополнительно:
 // Элементы <option></option> желательно сформировать на базе
 // данных из фильтров
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { useState, useEffect } from 'react';
+import { heroAdd, elementsAdd } from '../../actions';
+import { useDispatch, useSelector} from 'react-redux';
 import { useHttp } from '../../hooks/http.hook';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const HeroesAddForm = () => {
-    const {newHero, setNewHero} = useState({});
+    const [hero, setHero] = useState({id: uuidv4()});
+    const {filters} = useSelector(state => state);
     const {request} = useHttp();
-    const {heroes, heroesLoadingStatus} = useSelector(state => state);
     const dispatch = useDispatch();
-    
+
+    useEffect(() => {
+        request("http://localhost:3001/filters")
+            .then(data => dispatch(elementsAdd(data)));
+        // eslint-disable-next-line
+    }, []);
+
     const onVlueChange = (e) => {
-        console.log(e.target);
-        // setNewHero({...newHero, e.target.value})
+        let value = e.target.value;
+        switch(e.target.name) {
+            case 'name':
+                setHero({...hero, name: value});
+                break;
+            case 'text':
+                setHero({...hero, description: value});
+                break;
+            case 'element':
+                setHero({...hero, element: value});
+                break;
+            default:
+                console.log('error');
+                break;
+        }
     }
 
     const onSubmit = (e) => {
         e.preventDefault();
-        dispatch({type: 'HERO_ADD', payload: {}})
+        dispatch(heroAdd(hero));
+        request("http://localhost:3001/heroes",'POST', JSON.stringify(hero));
+        setHero({id: uuidv4()});
+        document.querySelector('form').reset();
     }
 
+    const renderElementsList = (arr) => {
+        return arr.map(({value, label}, index) => {
+            return <option key={index} value={value}>{label}</option>
+        })
+    }
+    
+    const elements = renderElementsList(filters);
+ 
     return (
-        <form className="border p-4 shadow-lg rounded">
+        <form className="border p-4 shadow-lg rounded" onSubmit={onSubmit}>
             <div className="mb-3">
                 <label htmlFor="name" className="form-label fs-4">Имя нового героя</label>
                 <input 
@@ -38,6 +72,7 @@ const HeroesAddForm = () => {
                     className="form-control" 
                     id="name" 
                     placeholder="Как меня зовут?"
+                    value={hero.name}
                     onChange={onVlueChange}/>
             </div>
 
@@ -50,6 +85,7 @@ const HeroesAddForm = () => {
                     id="text" 
                     placeholder="Что я умею?"
                     style={{"height": '130px'}}
+                    value={hero.text}
                     onChange={onVlueChange}/>
             </div>
 
@@ -60,15 +96,16 @@ const HeroesAddForm = () => {
                     className="form-select" 
                     id="element" 
                     name="element"
+                    value={hero.element}
                     onChange={onVlueChange}>
-                    <option >Я владею элементом...</option>
-                    <option value="fire">Огонь</option>
+                    <option value = "">Я владею элементом...</option>
+                    {/* <option value="fire">Огонь</option>
                     <option value="water">Вода</option>
                     <option value="wind">Ветер</option>
-                    <option value="earth">Земля</option>
+                    <option value="earth">Земля</option> */}
+                    {elements}
                 </select>
             </div>
-
             <button type="submit" className="btn btn-primary">Создать</button>
         </form>
     )

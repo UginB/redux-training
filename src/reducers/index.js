@@ -9,8 +9,12 @@ const reducer = (state = initialState, action) => {
         case 'HERO_ADD':
             return {
                 ...state,
-                heroes: [...state.heroes, action.payload],
-                heroesLoadingStatus: 'idle'
+                heroes: [...state.heroes, action.payload]
+            }
+        case 'HERO_DELETE':
+            return {
+                ...state,
+                heroes: state.heroes.filter(item => item.id !== action.payload)
             }
         case 'HEROES_FETCHING':
             return {
@@ -27,6 +31,11 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 heroesLoadingStatus: 'error'
+            }
+        case 'ELEMENTS_ADD':
+            return {
+                ...state,
+                filters: [...action.payload]
             }
         default: return state
     }
