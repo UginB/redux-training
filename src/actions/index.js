@@ -37,3 +37,10 @@ export const elementsAdd = (elements) => {
         payload: elements
     }
 }
+
+export const setFilter = (filter) => {
+    return {
+        type: 'SET_FILTER',
+        payload: filter
+    }
+}

@@ -5,14 +5,26 @@
 // Активный фильтр имеет класс active
 // Изменять json-файл для удобства МОЖНО!
 // Представьте, что вы попросили бэкенд-разработчика об этом
-import { useSelector} from 'react-redux';
+import { useSelector, useDispatch} from 'react-redux';
+import { setFilter } from '../../actions';
 
 const HeroesFilters = () => {
     const {filters} = useSelector(state => state);
+    const dispatch = useDispatch();
+
+    const onCurrentFilter = (e) => {
+        dispatch(setFilter(e.target.getAttribute('data-value')));
+    }
 
     const renderButtons = (arr) => {
-        return arr.map(({label, classlist}, index) => {
-            return <button key={index} className={"btn " + classlist}>{label}</button>
+        return arr.map(({label, value, classlist}, index) => {
+            return <button 
+                        onClick={onCurrentFilter}
+                        data-value={value} 
+                        key={index} 
+                        className={"btn " + classlist}>
+                            {label}
+                    </button>
         })
     }
 
@@ -23,7 +35,12 @@ const HeroesFilters = () => {
             <div className="card-body">
                 <p className="card-text">Отфильтруйте героев по элементам</p>
                 <div className="btn-group">
-                    <button className="btn btn-outline-dark active">Все</button>
+                    <button 
+                        onClick={onCurrentFilter}
+                        data-value='all' 
+                        className="btn btn-outline-dark active">
+                            Все
+                    </button>
                     {/* <button className="btn btn-danger">Огонь</button>
                     <button className="btn btn-primary">Вода</button>
                     <button className="btn btn-success">Ветер</button>
